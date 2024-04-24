@@ -1,0 +1,34 @@
+.layout {
+    background-color: #DDFFF7; 
+    background-size: "cover";
+}
+
+.container {
+    max-width: 408px;
+    margin: auto;
+}
+
+.title {
+    text-align: center;
+    color: #061A09;
+    font-size: 30px;
+    letter-spacing: -0.04em;
+}
+
+.imageContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.login-card {
+    background-color: #DDFFF7;
+    box-shadow: 0 0 10px 0 rgba(11, 75, 25, 0.5); /* Add blur shadow */
+    border: 1px solid transparent; /* Initial border */
+    transition: border-color 0.3s ease; /* Add transition for border color */
+}
+
+.login-card:hover {
+    border-color: #1d7623; /* Change border color on hover */
+}
