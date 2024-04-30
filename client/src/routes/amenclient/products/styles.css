@@ -1,0 +1,11 @@
+.login-card {
+    background-color: #DDFFF7;
+    box-shadow: 0 0 10px 0 rgba(11, 75, 25, 0.5); /* Add blur shadow */
+    border: 1px solid transparent; /* Initial border */
+    transition: border-color 0.3s ease; /* Add transition for border color */
+    margin-top: 3rem;
+}
+
+.login-card:hover {
+    border-color: #1d7623; /* Change border color on hover */
+}

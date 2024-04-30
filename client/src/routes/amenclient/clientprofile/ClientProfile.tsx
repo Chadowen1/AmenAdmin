@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 import {
     MenuUnfoldOutlined,
@@ -10,13 +10,12 @@ import {
     HomeOutlined,
     AppstoreOutlined,
     MessageOutlined,
-    ArrowDownOutlined,
-    ArrowUpOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Layout, Menu, theme, Button, Breadcrumb, Flex, Tooltip, Dropdown, Divider, Statistic, Col, Row, Card } from 'antd';
+import { Layout, Menu, theme, Button, Breadcrumb, Flex, Tooltip, Dropdown, Divider, Table } from 'antd';
 
-import { Logo } from "../../components/Logo/Logo";
+import { Logo } from "../../../components/Logo/Logo";
 import HeaderNav from './HeaderNav.tsx';
 import "./styles.css";
 
@@ -35,6 +34,8 @@ function getItem(
             <Link to="/">{label}</Link>
         ) : key === '2' ? (
             <Link to="/amenclient">{label}</Link>
+        ) : key === '5' ? (
+            <Link to="/products">{label}</Link>
         ) : (
             label
         );
@@ -48,26 +49,39 @@ function getItem(
 
 const items: MenuItem[] = [
     getItem('Mon Dashboard', '1', <PieChartOutlined />),
-    getItem('Amen Client', '2', <DesktopOutlined />),
-    getItem('Se déconnecter', '9', <LogoutOutlined />),
+    getItem('Amen Client', '2', <DesktopOutlined />, [
+        getItem('Profil Client', '4'),
+        getItem('Produits', '5'),
+    ]),
+    getItem('Se déconnecter', '3', <LogoutOutlined />),
 ];
 
-interface ObjectiveData {
-    ObjectifBNQDigi: number;
-    ObjectifBancassurance: number;
-    ObjectifCartes: number;
-    ObjectifEngagement: number;
-    ObjectifPack: number;
-    ObjectifRessource: number;
-    OuvCpt: number;
-}
+const columns = [
+    {
+        title: 'Code Compte',
+        dataIndex: 'CodeCompte',
+    },
+    {
+        title: 'Nom',
+        dataIndex: 'Nom',
+    },
+    {
+        title: 'Prenom',
+        dataIndex: 'Prenom',
+    },
+    {
+        title: 'Identifiant',
+        dataIndex: 'Identifiant',
+    },
+];
 
-export const Dashboard: React.FC = () => {
+export const ClientProfile: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
     const isMobile = useMediaQuery({ maxWidth: 769 });
     const [navFill, setNavFill] = useState(false);
-    const [performance, setPerformance] = useState(null);
-    const [objective, setObjective] = useState<ObjectiveData | null>(null);
+    const location = useLocation();
+    const fetchedData = location.state?.data || [];
+
     const {
         token: { borderRadiusLG, borderRadius },
     } = theme.useToken();
@@ -86,51 +100,6 @@ export const Dashboard: React.FC = () => {
         });
     }, []);
 
-    useEffect(() => {
-        const fetchObjectiveAndPerformance = async () => {
-            try {
-                // Fetch the employee's objective
-                const objectiveResponse = await fetch(`http://localhost:3000/employe/objectif?codeEmploye=A24EE50618`);
-                const objectiveData = await objectiveResponse.json() as ObjectiveData;
-                setObjective(objectiveData);
-                // Fetch the employee's performance
-                const performanceResponse = await fetch(`http://localhost:3000/employe/perfermance?codeemploye=A24EE50618&codeproduit=PA`);
-                const performanceData = await performanceResponse.json();
-                setPerformance(performanceData);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                // Handle error, show error message, etc.
-            }
-        };
-
-        fetchObjectiveAndPerformance();
-    }, []);
-    
-    const calculateSuffix = () => {
-        if (performance && objective && objective.ObjectifPack) {
-            return ` / ${objective.ObjectifPack}`;
-        }
-        return '';
-    };
-
-    const calculateValueStyle = () => {
-        if (performance && objective) {
-            const { total_products_sold } = performance;
-            const { ObjectifPack } = objective;
-            return total_products_sold < ObjectifPack ? { color: '#cf1322' } : { color: '#3f8600' };
-        }
-        return {};
-    };
-
-    const calculatePrefix = () => {
-        if (performance && objective) {
-            const { total_products_sold } = performance;
-            const { ObjectifPack } = objective;
-            return total_products_sold < ObjectifPack ? <ArrowDownOutlined /> : <ArrowUpOutlined />;
-        }
-        return null;
-    };
-
     return (
         <Layout hasSider style={{ minHeight: '100vh' }}>
             <Sider trigger={null} collapsible collapsed={collapsed}
@@ -143,7 +112,7 @@ export const Dashboard: React.FC = () => {
                     style={{ padding: '1rem 0' }}
                     collapsed={collapsed}
                 />
-                <Menu defaultSelectedKeys={['1']} mode="inline" items={items} />
+                <Menu defaultSelectedKeys={['4']} defaultOpenKeys={['2']} mode="inline" items={items} />
             </Sider>
             <Layout style={{ marginLeft: collapsed ? 80 : 200, minHeight: '100vh' }}>
                 <HeaderNav
@@ -220,27 +189,23 @@ export const Dashboard: React.FC = () => {
                             {
                                 title: (
                                     <>
-                                        <PieChartOutlined />
-                                        <span>Mon Dashboard</span>
+                                        <DesktopOutlined />
+                                        <span>Amen Client</span>
+                                    </>
+                                ),
+                            },
+                            {
+                                title: (
+                                    <>
+                                        <UserOutlined />
+                                        <span>Profil Client</span>
                                     </>
                                 ),
                             },
                         ]}
                     />
                     <Divider orientation="right"></Divider>
-                    <Row gutter={16}>
-                        <Col span={5}>
-                            <Card bordered={false}>
-                                <Statistic
-                                    title="Packs Vendu"
-                                    value={performance ? performance.total_products_sold : undefined}
-                                    valueStyle={calculateValueStyle()}
-                                    prefix={calculatePrefix()}
-                                    suffix={calculateSuffix()}
-                                />
-                            </Card>
-                        </Col>
-                    </Row>
+                    <Table columns={columns} dataSource={fetchedData} />
                 </Content>
             </Layout>
         </Layout>

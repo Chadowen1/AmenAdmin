@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Row,
     Col,
@@ -8,6 +8,7 @@ import {
     Form,
     Input,
     Button,
+    message,
 } from "antd";
 import "./styles.css";
 
@@ -20,12 +21,37 @@ export interface ILoginForm {
 
 export const Login: React.FC = () => {
     const [form] = Form.useForm<ILoginForm>();
-
+    const [loading, setLoading] = useState(false);
     const CardTitle = (
         <Title level={3} className="title">
             Connectez-vous
         </Title>
     );
+
+    const onFinish = async (values) => {
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:3000/login/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(values),
+            });
+            if (response.ok) {
+                message.success('Login successful');
+                // Redirect or perform necessary actions after successful login
+            } else {
+                const errorData = await response.json();
+                message.error(errorData.message || 'Login failed');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            message.error('An error occurred while logging in');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <AntdLayout className="layout">
@@ -45,9 +71,7 @@ export const Login: React.FC = () => {
                             <Form<ILoginForm>
                                 layout="vertical"
                                 form={form}
-                                onFinish={(values) => {
-                                    console.log('Finish:', values);
-                                }}
+                                onFinish={onFinish}
                                 requiredMark={false}
                             >
                                 <Form.Item
@@ -65,7 +89,7 @@ export const Login: React.FC = () => {
                                 >
                                     <Input type="password" placeholder="●●●●●●●●" size="large" />
                                 </Form.Item>
-                                <Button type="primary" style={{ backgroundColor: '#1d7623', color: 'white', marginTop: "20px" }} size="large" htmlType="submit" block>
+                                <Button type="primary" style={{ backgroundColor: '#1d7623', color: 'white', marginTop: "20px" }} size="large" htmlType="submit" block loading={loading}>
                                     Accéder
                                 </Button>
                             </Form>
