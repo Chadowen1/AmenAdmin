@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {useNavigate} from 'react-router-dom'
 import {
     Row,
     Col,
@@ -16,10 +17,11 @@ const { Title } = Typography;
 
 export interface ILoginForm {
     codeemploye: string;
-    password: string;
+    passkey: string; // Corrected property name
 }
 
 export const Login: React.FC = () => {
+    const navigate = useNavigate()
     const [form] = Form.useForm<ILoginForm>();
     const [loading, setLoading] = useState(false);
     const CardTitle = (
@@ -28,10 +30,10 @@ export const Login: React.FC = () => {
         </Title>
     );
 
-    const onFinish = async (values) => {
+    const onFinish = async (values: ILoginForm) => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/login/auth', {
+            const response = await fetch('http://localhost:3000/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -39,8 +41,13 @@ export const Login: React.FC = () => {
                 body: JSON.stringify(values),
             });
             if (response.ok) {
+                const data = await response.json();
+                const { token, CodeEmploye, Affectation } = data;
+                localStorage.setItem('jwtToken', token); // Store token in local storage
                 message.success('Login successful');
-                // Redirect or perform necessary actions after successful login
+                setTimeout(() => {
+                    navigate('/dashboard', { state: { CodeEmploye, Affectation } });
+                }, 2000);
             } else {
                 const errorData = await response.json();
                 message.error(errorData.message || 'Login failed');

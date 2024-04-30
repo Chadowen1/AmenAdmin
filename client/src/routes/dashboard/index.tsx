@@ -10,8 +10,6 @@ import {
     HomeOutlined,
     AppstoreOutlined,
     MessageOutlined,
-    ArrowDownOutlined,
-    ArrowUpOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Layout, Menu, theme, Button, Breadcrumb, Flex, Tooltip, Dropdown, Divider, Statistic, Col, Row, Card } from 'antd';
@@ -21,6 +19,12 @@ import HeaderNav from './HeaderNav.tsx';
 import "./styles.css";
 
 const { Content, Sider } = Layout;
+
+const handleLogout = () => {
+    // Clear the JWT token from localStorage
+    localStorage.removeItem('jwtToken');
+    // Redirect to the login page
+};
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -35,6 +39,8 @@ function getItem(
             <Link to="/">{label}</Link>
         ) : key === '2' ? (
             <Link to="/amenclient">{label}</Link>
+        ) : key === '9' ? (
+            <Link onClick={handleLogout} to="/">{label}</Link>
         ) : (
             label
         );
@@ -52,22 +58,10 @@ const items: MenuItem[] = [
     getItem('Se déconnecter', '9', <LogoutOutlined />),
 ];
 
-interface ObjectiveData {
-    ObjectifBNQDigi: number;
-    ObjectifBancassurance: number;
-    ObjectifCartes: number;
-    ObjectifEngagement: number;
-    ObjectifPack: number;
-    ObjectifRessource: number;
-    OuvCpt: number;
-}
-
 export const Dashboard: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
     const isMobile = useMediaQuery({ maxWidth: 769 });
     const [navFill, setNavFill] = useState(false);
-    const [performance, setPerformance] = useState(null);
-    const [objective, setObjective] = useState<ObjectiveData | null>(null);
     const {
         token: { borderRadiusLG, borderRadius },
     } = theme.useToken();
@@ -85,51 +79,6 @@ export const Dashboard: React.FC = () => {
             }
         });
     }, []);
-
-    useEffect(() => {
-        const fetchObjectiveAndPerformance = async () => {
-            try {
-                // Fetch the employee's objective
-                const objectiveResponse = await fetch(`http://localhost:3000/employe/objectif?codeEmploye=A24EE50618`);
-                const objectiveData = await objectiveResponse.json() as ObjectiveData;
-                setObjective(objectiveData);
-                // Fetch the employee's performance
-                const performanceResponse = await fetch(`http://localhost:3000/employe/perfermance?codeemploye=A24EE50618&codeproduit=PA`);
-                const performanceData = await performanceResponse.json();
-                setPerformance(performanceData);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                // Handle error, show error message, etc.
-            }
-        };
-
-        fetchObjectiveAndPerformance();
-    }, []);
-    
-    const calculateSuffix = () => {
-        if (performance && objective && objective.ObjectifPack) {
-            return ` / ${objective.ObjectifPack}`;
-        }
-        return '';
-    };
-
-    const calculateValueStyle = () => {
-        if (performance && objective) {
-            const { total_products_sold } = performance;
-            const { ObjectifPack } = objective;
-            return total_products_sold < ObjectifPack ? { color: '#cf1322' } : { color: '#3f8600' };
-        }
-        return {};
-    };
-
-    const calculatePrefix = () => {
-        if (performance && objective) {
-            const { total_products_sold } = performance;
-            const { ObjectifPack } = objective;
-            return total_products_sold < ObjectifPack ? <ArrowDownOutlined /> : <ArrowUpOutlined />;
-        }
-        return null;
-    };
 
     return (
         <Layout hasSider style={{ minHeight: '100vh' }}>
@@ -233,10 +182,6 @@ export const Dashboard: React.FC = () => {
                             <Card bordered={false}>
                                 <Statistic
                                     title="Packs Vendu"
-                                    value={performance ? performance.total_products_sold : undefined}
-                                    valueStyle={calculateValueStyle()}
-                                    prefix={calculatePrefix()}
-                                    suffix={calculateSuffix()}
                                 />
                             </Card>
                         </Col>
