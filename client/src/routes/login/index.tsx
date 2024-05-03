@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
     Row,
     Col,
@@ -11,6 +11,7 @@ import {
     Button,
     message,
 } from "antd";
+
 import "./styles.css";
 
 const { Title } = Typography;
@@ -42,12 +43,27 @@ export const Login: React.FC = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                const { token, CodeEmploye, Affectation } = data;
-                localStorage.setItem('jwtToken', token); // Store token in local storage
+                const { token, CodeEmploye } = data;
                 message.success('Login successful');
-                setTimeout(() => {
-                    navigate('/dashboard', { state: { CodeEmploye, Affectation } });
-                }, 2000);
+                // Fetch data using /data endpoint
+                const dataResponse = await fetch(`http://localhost:3000/employe/data?codeEmploye=${CodeEmploye}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Send JWT token in the header
+                    },
+                });
+                if (dataResponse.ok) {
+                    const userData = await dataResponse.json();
+                    userData[0].CodeEmploye = CodeEmploye;
+                    // Store data in session along with token
+                    sessionStorage.setItem('userToken', token);
+                    sessionStorage.setItem('userData', JSON.stringify(userData));
+                    message.success('Data retrieval successful');
+                    // Redirect to dashboard
+                    navigate('/dashboard');
+                } else {
+                    const errorData = await dataResponse.json();
+                    message.error(errorData.message || 'Data retrieval failed');
+                }
             } else {
                 const errorData = await response.json();
                 message.error(errorData.message || 'Login failed');

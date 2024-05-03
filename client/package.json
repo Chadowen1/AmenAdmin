@@ -11,7 +11,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/charts": "^2.1.0",
+    "@ant-design/pro-components": "^2.7.1",
     "antd": "^5.16.2",
+    "axios": "^1.6.8",
+    "i": "^0.3.7",
+    "ldrs": "^1.0.1",
+    "npm": "^10.7.0",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-dom": "^18.2.0",

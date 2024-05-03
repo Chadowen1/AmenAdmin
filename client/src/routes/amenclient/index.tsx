@@ -82,43 +82,76 @@ export const AmenClient: React.FC = () => {
             }
         });
     }, []);
-
     useEffect(() => {
-        fetch('http://localhost:3000/agence/zones')
-            .then(response => response.json())
-            .then(data => {
+        const fetchData = async () => {
+            try {
+                const token = localStorage.getItem('accessToken');
+                console.log(token)
+                const response = await fetch('http://localhost:3000/agence/zones', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+    
+                const data = await response.json();
                 setZones(data);
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching zones:', error);
-            });
+            }
+        };
+    
+        fetchData();
     }, []);
-
+    
     useEffect(() => {
         if (selectedZone) {
-            fetch(`http://localhost:3000/agence/gouvernerats?codeZone=${selectedZone}`)
-                .then(response => response.json())
-                .then(data => {
+            const fetchGouvernerats = async () => {
+                try {
+                    const token = localStorage.getItem('accessToken');
+                    const response = await fetch(`http://localhost:3000/agence/gouvernerats?codeZone=${selectedZone}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const data = await response.json();
                     setGouvernerats(data);
-                })
-                .catch(error => {
+                } catch (error) {
                     console.error('Error fetching gouvernerats:', error);
-                });
+                }
+            };
+            fetchGouvernerats();
         }
     }, [selectedZone]);
-
+    
     useEffect(() => {
         if (selectedGouvernerat) {
-            fetch(`http://localhost:3000/agence/data?codeGouvernerat=${selectedGouvernerat}`)
-                .then(response => response.json())
-                .then(data => {
+            const fetchAgences = async () => {
+                try {
+                    const token = localStorage.getItem('accessToken');
+                    const response = await fetch(`http://localhost:3000/agence/data?codeGouvernerat=${selectedGouvernerat}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const data = await response.json();
                     setAgences(data);
-                })
-                .catch(error => {
+                } catch (error) {
                     console.error('Error fetching agences:', error);
-                });
+                }
+            };
+            fetchAgences();
         }
     }, [selectedGouvernerat]);
+    
 
     const handleZoneChange = (value) => {
         setSelectedZone(value);
@@ -182,7 +215,12 @@ export const AmenClient: React.FC = () => {
             }
     
             try {
-                const response = await fetch(apiUrl);
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }

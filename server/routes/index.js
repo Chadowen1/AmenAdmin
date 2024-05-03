@@ -8,7 +8,7 @@ import requireAuth from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.use('/client', requireAuth, clientRoutes);
-router.use('/employe', requireAuth, employeRoutes);
+router.use('/employe', employeRoutes);
 router.use('/agence', requireAuth ,agenceRoutes);
 router.use('/', authRouter);
 
