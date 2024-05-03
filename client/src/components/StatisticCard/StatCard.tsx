@@ -3,7 +3,6 @@
 import React from 'react';
 import { StatisticCard } from '@ant-design/pro-components';
 import { ArrowUpOutlined } from '@ant-design/icons';
-import { Tiny } from '@ant-design/plots';
 
 interface StatCardProps {
     title: string;
@@ -11,7 +10,6 @@ interface StatCardProps {
     value: number;
     suffix?: string;
     valueStyle?: React.CSSProperties;
-    chartConfig: any;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -20,7 +18,6 @@ const StatCard: React.FC<StatCardProps> = ({
     value,
     suffix,
     valueStyle,
-    chartConfig
 }) => {
     return (
         <StatisticCard
@@ -35,9 +32,6 @@ const StatCard: React.FC<StatCardProps> = ({
                 suffix: suffix ? suffix : ' / 100',
                 valueStyle: valueStyle ? valueStyle : { color: '#3f8600' }
             }}
-            chart={
-                <Tiny.Progress {...chartConfig} />
-            }
         />
     );
 };

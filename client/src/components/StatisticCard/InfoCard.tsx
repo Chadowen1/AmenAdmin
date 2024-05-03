@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { BidirectionalBar } from '@ant-design/plots';
 import type { StatisticProps } from '@ant-design/pro-components';
 import { ProCard, StatisticCard } from '@ant-design/pro-components';
 import { Col, Row, Divider } from 'antd';
@@ -93,72 +92,6 @@ export const InfoCard: React.FC<InfoCardProps> = ({ year, quarter, month }) => {
         { key: '6', status: getStatus(parseInt(data.ComptesOuverts), parseInt(objectifData.SumOuvCpt)), title: 'Comptes', value: data.ComptesOuverts },
     ];
 
-    // const progress = 0.7;
-    // const config = {
-    //     autoFit: true,
-    //     height: 18,
-    //     percent: progress,
-    //     color: ['#f0f0f0', '#6394f9'],
-    //     annotations: [
-    //         {
-    //             type: 'text',
-    //             style: {
-    //                 text: `${progress * 100}%`,
-    //                 x: '50%',
-    //                 y: '50%',
-    //                 textAlign: 'center',
-    //                 fontSize: 11,
-    //             },
-    //         },
-    //     ],
-    // };
-
-    const corporateData = [
-        {
-            segment: 'ASSOCIATION',
-            'past': 13.4,
-            'present': 12.3,
-        },
-        {
-            segment: 'GROUPES',
-            'past': 14.4,
-            'present': 6.3,
-        },
-        {
-            segment: 'PME',
-            'past': 18.4,
-            'present': 8.3,
-        },
-        {
-            segment: 'GRANDE ENTREPRISE',
-            'past': 34.4,
-            'present': 13.8,
-        },
-        {
-            segment: 'CORPORATE BBB',
-            'past': 44.4,
-            'present': 19.5,
-        },
-    ];
-    const corporateConfig = {
-        data: corporateData,
-        height: 300,
-        width: 515,
-        sizeField: 15,
-        xField: 'segment',
-        yField: ['present', 'past'],
-        legend: {
-            color: {},
-            size: {},
-        },
-        style: {
-            fill: (d) => {
-                if (d.groupKey === 'past') return '#64DAAB';
-                return '#6395FA';
-            },
-        },
-    };
-
     return (
         <ProCard
             tabs={{
@@ -209,12 +142,12 @@ export const InfoCard: React.FC<InfoCardProps> = ({ year, quarter, month }) => {
                                 <Row justify="center" gutter={4} align="bottom" style={{ marginTop: 30 }}>
                                     <Col>
                                         <Divider orientation="center">Corporate</Divider>
-                                        <BidirectionalBar {...corporateConfig} />
+                                        
                                     </Col>
                                     <Divider type={'vertical'} />
                                     <Col>
                                         <Divider orientation="center">Retail</Divider>
-                                        <BidirectionalBar {...corporateConfig} />
+                                        
                                     </Col>
                                 </Row>
                             </div>
