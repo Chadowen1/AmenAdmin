@@ -7,7 +7,6 @@ import { Dashboard } from './routes/dashboard';
 import { AmenClient } from './routes/amenclient';
 import { ClientProfile } from './routes/amenclient/clientprofile/ClientProfile';
 import { Products } from './routes/amenclient/products/Products';
-import { InfoCard } from './components/StatisticCard/InfoCard';
 
 const PrivateRoutes = () => {
   const isAuthenticated = sessionStorage.getItem('userToken') ? true : false;
@@ -55,7 +54,6 @@ export default function App() {
         <AntdApp>
           <Routes>
             <Route path="/" element={<Login />} />
-            <Route path="/stat" element={<InfoCard />} />
             <Route element={<PrivateRoutes />}>
               <Route path='/dashboard' element={<Dashboard />} />
               <Route path="/amenclient" element={<AmenClient />} />

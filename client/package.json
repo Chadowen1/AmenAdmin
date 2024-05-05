@@ -12,8 +12,6 @@
   },
   "dependencies": {
     "@ant-design/pro-components": "^2.7.1",
-    "@nivo/bar": "^0.86.0",
-    "@nivo/core": "^0.86.0",
     "antd": "^5.16.2",
     "axios": "^1.6.8",
     "i": "^0.3.7",
@@ -25,6 +23,7 @@
     "react-dom": "^18.2.0",
     "react-responsive": "^10.0.0",
     "react-router-dom": "^6.22.3",
+    "recharts": "^2.12.6",
     "styled-components": "^6.1.8"
   },
   "devDependencies": {

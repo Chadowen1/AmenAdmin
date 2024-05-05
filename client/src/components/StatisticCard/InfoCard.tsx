@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { StatisticProps } from '@ant-design/pro-components';
 import { ProCard, StatisticCard } from '@ant-design/pro-components';
-import { Col, Row, Divider } from 'antd';
+import { TotalStats } from '../Statistics/TotalStats/TotalStats';
 import axios from 'axios';
 
 const { Statistic } = StatisticCard;
@@ -13,14 +13,26 @@ interface InfoCardProps {
 }
 
 export const InfoCard: React.FC<InfoCardProps> = ({ year, quarter, month }) => {
-    const [data, setData] = useState<{ [key: string]: string }>({
-        BancassuranceVendu: "0",
+    const [data, setData] = useState<{
+        BancassuranceVendus: string;
+        BNQDigiVendus: string;
+        CartesVendus: string;
+        PacksVendus: string;
+        ComptesOuverts: string;
+    }>({
+        BancassuranceVendus: "0",
         BNQDigiVendus: "0",
         CartesVendus: "0",
-        PacksVendu: "0",
+        PacksVendus: "0",
         ComptesOuverts: "0",
     });
-    const [objectifData, setObjectifData] = useState<{ [key: string]: string }>({
+    const [objectifData, setObjectifData] = useState<{
+        SumObjectifBancassurance: string;
+        SumObjectifBNQDigi: string;
+        SumObjectifCartes: string;
+        SumObjectifPack: string;
+        SumOuvCpt: string;
+    }>({
         SumObjectifBancassurance: "0",
         SumObjectifBNQDigi: "0",
         SumObjectifCartes: "0",
@@ -34,10 +46,8 @@ export const InfoCard: React.FC<InfoCardProps> = ({ year, quarter, month }) => {
                 // Retrieve userData from session storage
                 const userDataString = sessionStorage.getItem('userData');
                 const userData = userDataString ? JSON.parse(userDataString) : [];
-
                 // Extract codeEmploye from userData
                 const codeEmploye = userData.length > 0 ? userData[0].CodeEmploye : '';
-
                 // Fetch data using codeEmploye from userData
                 const response = await axios.get('http://localhost:3000/employe/stats', {
                     params: {
@@ -48,7 +58,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({ year, quarter, month }) => {
                     },
                 });
                 setData(response.data);
-
+                console.log("quarter: ", quarter);
                 // Fetch total objectif data
                 const objectifResponse = await axios.get('http://localhost:3000/employe/objectif', {
                     params: {
@@ -68,10 +78,10 @@ export const InfoCard: React.FC<InfoCardProps> = ({ year, quarter, month }) => {
     }, [year, quarter, month]);
 
     const totalValue =
-        parseInt(data.BancassuranceVendu) +
+        parseInt(data.BancassuranceVendus) +
         parseInt(data.BNQDigiVendus) +
         parseInt(data.CartesVendus) +
-        parseInt(data.PacksVendu) +
+        parseInt(data.PacksVendus) +
         parseInt(data.ComptesOuverts);
 
     const getStatus = (value: number, total: number) => {
@@ -85,7 +95,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({ year, quarter, month }) => {
 
     const items = [
         { key: '1', status: 'default', title: 'Total Objectif', value: totalValue, total: true },
-        { key: '2', status: getStatus(parseInt(data.BancassuranceVendu), parseInt(objectifData.SumObjectifBancassurance)), title: 'Bancassurance', value: data.BancassuranceVendu },
+        { key: '2', status: getStatus(parseInt(data.BancassuranceVendus), parseInt(objectifData.SumObjectifBancassurance)), title: 'Bancassurance', value: data.BancassuranceVendus },
         { key: '3', status: getStatus(parseInt(data.BNQDigiVendus), parseInt(objectifData.SumObjectifBNQDigi)), title: 'BNQDigital', value: data.BNQDigiVendus },
         { key: '4', status: getStatus(parseInt(data.CartesVendus), parseInt(objectifData.SumObjectifCartes)), title: 'Cartes', value: data.CartesVendus },
         { key: '5', status: getStatus(parseInt(data.PacksVendus), parseInt(objectifData.SumObjectifPack)), title: 'Packs', value: data.PacksVendus },
@@ -121,35 +131,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({ year, quarter, month }) => {
                                     padding: 0,
                                 }}
                             >
-                                <Row justify="center" style={{ paddingTop: 30 }}>
-                                    {/* main objectif */}
-                                </Row>
-                                <Row justify="center" gutter={15} style={{ marginTop: 30 }}>
-                                    <Col>
-                                        {/* Bancassurance */}
-                                    </Col>
-                                    <Col>
-                                        {/* BNQDigital */}
-                                    </Col>
-                                    <Col>
-                                        {/* Cartes */}
-                                    </Col>
-                                    <Col>
-                                        {/* Packs */}
-                                    </Col>
-                                </Row>
-                                <Divider type={'horizontal'} />
-                                <Row justify="center" gutter={4} align="bottom" style={{ marginTop: 30 }}>
-                                    <Col>
-                                        <Divider orientation="center">Corporate</Divider>
-                                        
-                                    </Col>
-                                    <Divider type={'vertical'} />
-                                    <Col>
-                                        <Divider orientation="center">Retail</Divider>
-                                        
-                                    </Col>
-                                </Row>
+                                <TotalStats data={data} objectifData={objectifData} year={year} quarter={quarter} month={month} />
                             </div>
                         ),
                     };

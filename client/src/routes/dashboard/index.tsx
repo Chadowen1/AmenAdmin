@@ -24,7 +24,6 @@ import "./styles.css";
 const { Content, Sider } = Layout;
 
 const handleLogout = () => {
-    // Clear the user data and token from sessionStorage
     sessionStorage.removeItem('userToken');
     sessionStorage.removeItem('userData');
 };
@@ -106,7 +105,7 @@ export const Dashboard: React.FC = () => {
     useEffect(() => {
         setTimeout(() => {
             setLoading(false);
-        }, 2000);
+        }, 3000);
     }, []);
 
     useEffect(() => {
