@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 import {
     MenuUnfoldOutlined,
@@ -11,14 +11,14 @@ import {
     ClockCircleOutlined,
     CalendarOutlined,
     AuditOutlined,
+    CheckCircleOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Layout, Menu, theme, Button, Breadcrumb, Flex, Tooltip, Dropdown, Divider, DatePicker, Space } from 'antd';
-import dayjs from 'dayjs';
+import { Layout, Menu, theme, Button, Breadcrumb, Flex, Tooltip, Dropdown, Divider, DatePicker, Space, Table, Tag, Row } from 'antd';
 
-import { InfoCard } from "../../components/StatisticCard/InfoCard.tsx"
 import { Logo } from "../../components/Logo/Logo";
 import HeaderNav from './HeaderNav.tsx';
+import "./styles.css";
 
 const { Content, Sider } = Layout;
 
@@ -26,6 +26,73 @@ const handleLogout = () => {
     sessionStorage.removeItem('userToken');
     sessionStorage.removeItem('userData');
 };
+
+const columns = [
+    {
+        title: 'Code Compte',
+        dataIndex: 'codeCompte',
+    },
+    {
+        title: 'Type',
+        dataIndex: 'typeCompte',
+    },
+    {
+        title: 'Date Creation',
+        dataIndex: 'dateCreation',
+    },
+    {
+        title: 'Date Validation',
+        dataIndex: 'dateValidation',
+    },
+    {
+        title: 'Ouvert à',
+        dataIndex: 'agence',
+    },
+    {
+        title: 'Ouvert Par',
+        dataIndex: 'employe',
+    },
+    {
+        title: 'Etat',
+        dataIndex: 'etatCompte',
+    },
+];
+
+const dataSource = [
+    {
+        codeCompte:    <a href="">CC00R1Pq6e</a>,
+        typeCompte: 'TC01',
+        dateCreation: '2022-08-28',
+        dateValidation: '2024-08-28',
+        agence: 'CARNOY',
+        employe: 'A01EE00378',
+        etatCompte: <Tag icon={<CheckCircleOutlined />} color="success">
+            Actif
+        </Tag>,
+    },
+    {
+        codeCompte:    <a href="">CC0jrR5r7o</a>,
+        typeCompte: 'TC03',
+        dateCreation: '2022-09-27',
+        dateValidation: '2024-09-27',
+        agence: 'SAHLOUL',
+        employe: 'A20EE41408',
+        etatCompte: <Tag icon={<CheckCircleOutlined />} color="success">
+            Actif
+        </Tag>,
+    },
+    {
+        codeCompte:    <a href="">CC0sjfnHuA</a>,
+        typeCompte: 'TC01',
+        dateCreation: '2023-07-06',
+        dateValidation: '2025-07-06',
+        agence: 'DOUAR HICHER',
+        employe: 'A13EE14431',
+        etatCompte: <Tag icon={<CheckCircleOutlined />} color="error">
+            Actif
+        </Tag>,
+    },
+];
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -37,15 +104,11 @@ function getItem(
 ): MenuItem {
     const menuItemLabel =
         key === '1' ? (
-            <Link to="/">{label}</Link>
+            <Link to="/dashboard">{label}</Link>
         ) : key === '2' ? (
             <Link to="/amenclient">{label}</Link>
-        ) : key === '4' ? (
-            <Link onClick={handleLogout} to="/">{label}</Link>
-        ) : key === '5' ? (
-            <Link to="/employeprofile">{label}</Link>
         ) : key === '3' ? (
-            <Link to="/amencomptes">{label}</Link>
+            <Link onClick={handleLogout} to="/">{label}</Link>
         ) : (
             label
         );
@@ -59,16 +122,17 @@ function getItem(
 
 const items: MenuItem[] = [
     getItem('Mon Dashboard', '1', <PieChartOutlined />),
-    getItem('Amen Client', '2', <DesktopOutlined />),
+    getItem('Amen Client', '2', <DesktopOutlined />,),
     getItem('Amen Comptes', '3', <AuditOutlined />),
     getItem('Se déconnecter', '4', <LogoutOutlined />),
 ];
+
 const userDataString = sessionStorage.getItem('userData');
 const userData = userDataString ? JSON.parse(userDataString) : [];
 // Extract Nom and Prenom from user data if available
 const nom = userData && userData.length > 0 ? userData[0].Nom : '';
 const prenom = userData && userData.length > 0 ? userData[0].Prenom : '';
-const codeEmploye = userData && userData.length > 0 ? userData[0].CodeEmploye: '';
+const codeEmploye = userData && userData.length > 0 ? userData[0].CodeEmploye : '';
 
 const profileItems: MenuItem[] = [
     getItem(`${nom} ${prenom}`, ''), // Adjust accordingly
@@ -76,26 +140,15 @@ const profileItems: MenuItem[] = [
     getItem('Se déconnecter', '4', <LogoutOutlined />), // Assuming handleLogout is defined
 ];
 
-const yearFormat = 'YYYY';
-const quarterFormat = 'YYYY-Q[Q]';
-const monthFormat = 'YYYY-MM';
-
-export const Dashboard: React.FC = () => {
-    const location = useLocation();
-    const { data, objectifData } = location.state;
+export const AmenComptes: React.FC = () => {
     const [date, setDate] = useState(new Date());
     const [use24HourFormat, setUse24HourFormat] = useState(true);
     const [collapsed, setCollapsed] = useState(false);
     const isMobile = useMediaQuery({ maxWidth: 769 });
     const [navFill, setNavFill] = useState(false);
-    const currentYear = dayjs(date).format(yearFormat);
     const {
-        token: { borderRadiusLG, borderRadius
-        },
+        token: { borderRadiusLG, borderRadius },
     } = theme.useToken();
-    const [selectedYear, setSelectedYear] = useState<number>(dayjs(date).year());
-    const [selectedQuarter, setSelectedQuarter] = useState<number | null>(null);
-    const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
 
     useEffect(() => {
         const timer = setInterval(() => setDate(new Date()), 1000);
@@ -120,21 +173,6 @@ export const Dashboard: React.FC = () => {
         });
     }, []);
 
-    const handleYearPickerChange = (date) => {
-        const year = date.year();
-        setSelectedYear(year);
-    };
-
-    const handleQuarterPickerChange = (date) => {
-        const quarter = date.quarter();
-        setSelectedQuarter(quarter);
-    };
-
-    const handleMonthPickerChange = (date) => {
-        const month = date.month() + 1; // month() returns 0-indexed month
-        setSelectedMonth(month);
-    };
-
     return (
         <Layout hasSider style={{ minHeight: '100vh' }}>
             <Sider trigger={null} collapsible collapsed={collapsed}
@@ -147,7 +185,11 @@ export const Dashboard: React.FC = () => {
                     style={{ padding: '1rem 0' }}
                     collapsed={collapsed}
                 />
-                <Menu defaultSelectedKeys={['1']} mode="inline" items={items} />
+                <Menu
+                    defaultSelectedKeys={['3']} // Initial default selected keys
+                    mode="inline"
+                    items={items}
+                />
                 <div style={{ textAlign: 'center', position: 'absolute', bottom: '1rem', left: 0, right: 0 }}>
                     Bonjour {nom} {prenom}!
                     <div>{codeEmploye}</div>
@@ -210,8 +252,8 @@ export const Dashboard: React.FC = () => {
                     </Flex>
                 </HeaderNav>
                 <Content style={{
-                    margin: '15px 10px',
-                    padding: 5,
+                    margin: '24px 16px',
+                    padding: 10,
                     minHeight: 280,
                     borderRadius: borderRadiusLG,
                 }}
@@ -230,8 +272,8 @@ export const Dashboard: React.FC = () => {
                             {
                                 title: (
                                     <>
-                                        <PieChartOutlined />
-                                        <span>Mon Dashboard</span>
+                                        <DesktopOutlined />
+                                        <span>Amen Comptes</span>
                                     </>
                                 ),
                             },
@@ -239,13 +281,17 @@ export const Dashboard: React.FC = () => {
                     />
                     <Divider orientation="right">
                         <Space>
-                            <DatePicker picker="year" defaultValue={dayjs(currentYear, yearFormat)} format={yearFormat} onChange={handleYearPickerChange} />
-                            <DatePicker picker="quarter" defaultValue={null} format={quarterFormat} onChange={handleQuarterPickerChange} />
-                            <DatePicker picker="month" defaultValue={null} format={monthFormat} onChange={handleMonthPickerChange} />
-                            <Button type="primary" style={{ backgroundColor: '#1d7623', color: 'white' }}>Comparer</Button>
+                            <DatePicker picker="year" />
+                            <DatePicker picker="quarter" defaultValue={null} />
+                            <DatePicker picker="month" defaultValue={null} />
                         </Space>
                     </Divider>
-                    <InfoCard year={selectedYear} quarter={selectedQuarter} month={selectedMonth} data={data} objectifData={objectifData} />
+                    <Divider orientation="left">
+                        Liste des comptes non équipés
+                    </Divider>
+                    <Row align="middle" justify={'center'} style={{marginTop: 50}}>
+                        <Table dataSource={dataSource} columns={columns} />
+                    </Row>
                 </Content>
             </Layout>
         </Layout>

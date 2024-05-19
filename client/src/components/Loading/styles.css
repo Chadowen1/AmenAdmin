@@ -8,3 +8,8 @@
     margin: auto;
     text-align: center;
 }
+
+.result-container {
+    margin: 0;
+    padding: 0;
+}

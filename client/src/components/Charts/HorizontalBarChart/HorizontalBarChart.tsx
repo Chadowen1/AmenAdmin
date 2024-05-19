@@ -8,7 +8,7 @@ import {
     Bar,
 } from "recharts";
 
-const HorizontalBarChart = ({ data }) => {
+const HorizontalBarChart = ({ data, year }) => {
     return (
         <BarChart
             width={500}
@@ -19,11 +19,11 @@ const HorizontalBarChart = ({ data }) => {
         >
             <XAxis type="number" domain={[0, 100]} />
             <YAxis type="category" dataKey="segment" fontSize={'0.7rem'} />
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" fill='white'/>
             <Tooltip />
             <Legend />
-            <Bar dataKey="2024" fill="#8884d8" />
-            {/* <Bar dataKey="uv" fill="#82ca9d" /> */}
+            <Bar dataKey="2024" fill="#1d7723" barSize={12} radius={[0, 10, 10, 0]}/>
+            <Bar dataKey="2023" fill="#093d90" barSize={12} radius={[0, 10, 10, 0]}/>
         </BarChart>
     );
 };

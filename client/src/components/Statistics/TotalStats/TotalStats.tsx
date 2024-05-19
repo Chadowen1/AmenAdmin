@@ -31,58 +31,117 @@ interface TotalStatsProps {
 }
 
 export const TotalStats: React.FC<TotalStatsProps> = ({ data, objectifData, year, quarter, month }) => {
-    const sumObjectifData = parseInt(objectifData.SumObjectifBancassurance)
-        + parseInt(objectifData.SumObjectifBNQDigi)
-        + parseInt(objectifData.SumObjectifCartes)
-        + parseInt(objectifData.SumObjectifPack)
-        + parseInt(objectifData.SumOuvCpt);
-    const sumData = parseInt(data.BancassuranceVendus)
-        + parseInt(data.BNQDigiVendus)
-        + parseInt(data.CartesVendus)
-        + parseInt(data.PacksVendus)
-        + parseInt(data.ComptesOuverts);
-    const [corporateData, setCorporateData] = useState([]);
-    const [retailData, setRetailData] = useState([]);
+    // const sumObjectifData = parseInt(objectifData.SumObjectifBancassurance)
+    //     + parseInt(objectifData.SumObjectifBNQDigi)
+    //     + parseInt(objectifData.SumObjectifCartes)
+    //     + parseInt(objectifData.SumObjectifPack)
+    //     + parseInt(objectifData.SumOuvCpt);
+    // const sumData = parseInt(data.BancassuranceVendus)
+    //     + parseInt(data.BNQDigiVendus)
+    //     + parseInt(data.CartesVendus)
+    //     + parseInt(data.PacksVendus)
+    //     + parseInt(data.ComptesOuverts);
+    const sumObjectifData = 281;
+    const sumData = 272;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const userDataString = sessionStorage.getItem('userData');
-                const userData = userDataString ? JSON.parse(userDataString) : [];
-                // Extract codeEmploye from userData
-                const codeEmploye = userData.length > 0 ? userData[0].CodeEmploye : '';
-                const responseRetail = await axios.get('http://localhost:3000/employe/produitStats', {
-                    params: {
-                        codeEmploye: codeEmploye,
-                        relation: "RETAIL",
-                        year: year,
-                        quarter: quarter,
-                        month: month,
-                    },
-                });
-                setRetailData(responseRetail.data);
-                const responseCorporate = await axios.get('http://localhost:3000/employe/produitStats', {
-                    params: {
-                        codeEmploye: codeEmploye,
-                        relation: "CORPORATE",
-                        year: year,
-                        quarter: quarter,
-                        month: month,
-                    },
-                });
-                setCorporateData(responseCorporate.data);         
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        fetchData();
-    }, [year, quarter, month]);
+    const retailDataMock = [
+        {
+            "2024": 16,
+            "2023": 18,
+            "segment": "Salarié"
+        },
+        {
+            "2024": 8,
+            "2023": 20,
+            "segment": "Elève"
+        },
+        {
+            "2024": 12,
+            "2023": 18,
+            "segment": "Etudiant"
+        },
+        {
+            "2024": 56,
+            "2023": 44,
+            "segment": "Retraité"
+        },
+        {
+            "2024": 36,
+            "2023": 45,
+            "segment": "Professionnel"
+        },
+        {
+            "2024": 12,
+            "2023": 12,
+            "segment": "Profession Libérale"
+        }
+    ];
+
+    const corporateDataMock = [
+        {
+            "2024": 16,
+            "2023": 12,
+            "segment": "Institutionnel"
+        },
+        {
+            "2024": 54,
+            "2023": 60,
+            "segment": "Groupes"
+        },
+        {
+            "2024": 22,
+            "2022": 30,
+            "segment": "PME"
+        },
+        {
+            "2024": 40,
+            "2023": 41,
+            "segment": "GE"
+        }
+    ];
+
+    const [corporateData, setCorporateData] = useState<any[]>(corporateDataMock);
+    const [retailData, setRetailData] = useState<any[]>(retailDataMock);
+
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const userDataString = sessionStorage.getItem('userData');
+    //             const userData = userDataString ? JSON.parse(userDataString) : [];
+    //             // Extract codeEmploye from userData
+    //             const codeEmploye = userData.length > 0 ? userData[0].CodeEmploye : '';
+    //             const responseRetail = await axios.get('http://localhost:3000/products/stats', {
+    //                 params: {
+    //                     codeEmploye: codeEmploye,
+    //                     relation: "Retail",
+    //                     year: year,
+    //                     quarter: quarter,
+    //                     month: month,
+    //                 },
+    //             });
+    //             setRetailData(responseRetail.data);
+    //             const responseCorporate = await axios.get('http://localhost:3000/products/stats', {
+    //                 params: {
+    //                     codeEmploye: codeEmploye,
+    //                     relation: "Corporate",
+    //                     year: year,
+    //                     quarter: quarter,
+    //                     month: month,
+    //                 },
+    //             });
+    //             setCorporateData(responseCorporate.data);
+    //         } catch (error) {
+    //             console.error(error);
+    //         }
+    //     };
+    //     fetchData();
+    // }, [year, quarter, month]);
 
     return (
         <>
             <Row justify="center" style={{ paddingTop: 30 }}>
                 <StatCard
-                    title="Total Objectif"
+                    title="Total de produits vendus en 2024 par rapport à 2023"
                     width={500}
                     value={String(sumData) !== '' ? String(sumData) : 'NA'}
                     suffix={Object.keys(objectifData).length > 0 && sumObjectifData !== null ? ` / ${sumObjectifData}` : 'NA'}
@@ -103,7 +162,7 @@ export const TotalStats: React.FC<TotalStatsProps> = ({ data, objectifData, year
                     progress={(sumData / sumObjectifData) * 100}
                 />
             </Row>
-            <Row justify="center" gutter={15} style={{ marginTop: 30 }}>
+            <Row justify="center" gutter={15} style={{ marginTop: 30, paddingBottom: 30 }}>
                 <Col>
                     <StatCard
                         title="Bancassurance"
@@ -193,16 +252,16 @@ export const TotalStats: React.FC<TotalStatsProps> = ({ data, objectifData, year
                     />
                 </Col>
             </Row>
-            <Divider type={'horizontal'} />
+            <Divider orientation="center">Répartition des ventes par segment en 2024 et 2023</Divider>
             <Row justify="center" gutter={4} align="bottom" style={{ marginTop: 30 }}>
                 <Col className="chartContainer">
                     <Divider orientation="center">Corporate</Divider>
-                    <HorizontalBarChart data={corporateData} />
+                    <HorizontalBarChart data={corporateData} year={year} />
                 </Col>
                 <Divider type={'vertical'} />
                 <Col>
                     <Divider orientation="center">Retail</Divider>
-                    <HorizontalBarChart data={retailData} />
+                    <HorizontalBarChart data={retailData} year={year} />
                 </Col>
             </Row>
         </>

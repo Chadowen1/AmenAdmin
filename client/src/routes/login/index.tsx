@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from 'react-router-dom'
 import {
     Row,
     Col,
@@ -12,6 +11,8 @@ import {
     message,
 } from "antd";
 
+import { Loading } from "../../components/Loading/Loading";
+
 import "./styles.css";
 
 const { Title } = Typography;
@@ -22,9 +23,9 @@ export interface ILoginForm {
 }
 
 export const Login: React.FC = () => {
-    const navigate = useNavigate()
     const [form] = Form.useForm<ILoginForm>();
     const [loading, setLoading] = useState(false);
+    const [loadingScreen, setLoadingScreen] = useState(false);
     const CardTitle = (
         <Title level={3} className="title">
             Connectez-vous
@@ -44,7 +45,6 @@ export const Login: React.FC = () => {
             if (response.ok) {
                 const data = await response.json();
                 const { token, CodeEmploye } = data;
-                message.success('Login successful');
                 // Fetch data using /data endpoint
                 const dataResponse = await fetch(`http://localhost:3000/employe/data?codeEmploye=${CodeEmploye}`, {
                     headers: {
@@ -57,24 +57,25 @@ export const Login: React.FC = () => {
                     // Store data in session along with token
                     sessionStorage.setItem('userToken', token);
                     sessionStorage.setItem('userData', JSON.stringify(userData));
-                    message.success('Data retrieval successful');
-                    // Redirect to dashboard
-                    navigate('/dashboard');
+                    setLoadingScreen(true);
                 } else {
                     const errorData = await dataResponse.json();
                     message.error(errorData.message || 'Data retrieval failed');
                 }
             } else {
                 const errorData = await response.json();
-                message.error(errorData.message || 'Login failed');
+                message.error(errorData.message || 'La connexion a échoué');
             }
         } catch (error) {
-            console.error('Login error:', error);
-            message.error('An error occurred while logging in');
+            message.error('Une erreur s\'est produite lors de la connexion');
         } finally {
             setLoading(false);
         }
     };
+
+    if (loadingScreen) {
+        return <Loading />;
+    }
 
     return (
         <AntdLayout className="layout">
@@ -99,14 +100,14 @@ export const Login: React.FC = () => {
                             >
                                 <Form.Item
                                     name="codeemploye"
-                                    label="Code Employé"
+                                    label="Code employé"
                                     rules={[{ required: true }]}
                                 >
-                                    <Input size="large" placeholder="Code Employé" />
+                                    <Input size="large" placeholder="Code employé" />
                                 </Form.Item>
                                 <Form.Item
                                     name="passkey"
-                                    label="Clé d'Accès"
+                                    label="Clé d'accès"
                                     rules={[{ required: true }]}
                                     style={{ marginBottom: "12px" }}
                                 >

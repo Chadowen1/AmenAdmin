@@ -1,5 +1,5 @@
 .layout {
-    background-color: #c7efcf; 
+    background-color: #A5EDA5; 
     background-size: "cover";
 }
 
@@ -23,7 +23,6 @@
 }
 
 .login-card {
-    background-color: #DDFFF7;
     box-shadow: 0 0 10px 0 rgba(11, 75, 25, 0.5); /* Add blur shadow */
     border: 1px solid transparent; /* Initial border */
     transition: border-color 0.3s ease; /* Add transition for border color */

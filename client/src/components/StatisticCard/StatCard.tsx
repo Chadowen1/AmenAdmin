@@ -1,6 +1,5 @@
 import React from 'react';
 import { StatisticCard } from '@ant-design/pro-components';
-import { ArrowUpOutlined } from '@ant-design/icons';
 import { Progress } from 'antd';
 
 interface StatCardProps {
@@ -21,7 +20,7 @@ const StatCard: React.FC<StatCardProps> = ({
     prefix,
     value,
     suffix,
-    valueStyle,
+    valueStyle = { color: '#bfbfbf' },
     height = 130,
     width = 250, 
     progress = 0,
@@ -36,13 +35,14 @@ const StatCard: React.FC<StatCardProps> = ({
             style={{
                 height: height,
                 width: width,
+                backgroundColor: '#FFFFFF',
             }}
             statistic={{
                 title: title,
-                prefix: prefix ? prefix : <ArrowUpOutlined />,
+                prefix: prefix,
                 value: value,
-                suffix: suffix ? suffix : ' / 100',
-                valueStyle: valueStyle ? valueStyle : { color: '#3f8600' }
+                suffix: suffix ? suffix : ' / NA',
+                valueStyle: valueStyle,
             }}
             chart={<Progress percent={formattedProgress} type="line" strokeColor={strokeColor}/>}
         />
