@@ -9,18 +9,5 @@ Clone Repository to your local machine
 
 Make sure you have npm installed on your machine
 
-### Client
-
-`cd client`
-
-`npm install`
-
-`npm run dev`
-
-### Server
-
-`cd server`
-
-`npm install`
-
-`npm run dev`
+## RUN
+yarn run dev
