@@ -1,0 +1,15 @@
+.layout {
+    background-color: #c7efcf; 
+    background-size: "cover";
+}
+
+.container {
+    max-width: 408px;
+    margin: auto;
+    text-align: center;
+}
+
+.result-container {
+    margin: 0;
+    padding: 0;
+}
