@@ -1,6 +1,6 @@
 import express from 'express';
 import db from '../config/db.js';
-import dw from '../config/dw.js';
+import clickhouse from '../config/click.js';
 
 const router = express.Router();
 
@@ -28,7 +28,7 @@ router.get('/objectif', async (req, res) => {
                 whereClause += ` AND Mois IN (${quarterMonthsList.join(',')})`;
             }
         }
-        // Execute the SQL query with the dynamically generated WHERE clause
+        // Execute the SQL query with the dynamically generated WHERE   
         const [objectif] = await db.query(`
             SELECT  
                 SUM(OuvCpt) AS SumOuvCpt,
@@ -76,167 +76,66 @@ router.get('/stats', async (req, res) => {
         if (!codeEmploye || !year) {
             return res.status(400).json({ message: 'codeEmploye and year parameters are required' });
         }
-        const client = await dw.connect();
-        // Define your SQL query with named parameters
+        // Define your ClickHouse SQL query with named parameters
         let query = `
             SELECT
                 LEFT(dp.codeproduit, 2) AS Product_Group,
-                COUNT(fpe.produitsk) AS Product_Count
-            FROM 
-                fait_performance_employe fpe 
-            LEFT JOIN 
-                dimemployes de ON de.employesk = fpe.employesk 
-            LEFT JOIN
-                dimproduit dp ON dp.produitsk = fpe.produitsk 
-            LEFT JOIN 
-                dimdate da ON da.datesk = fpe.date_activation_sk
-            WHERE 
-                de.codeemploye = $1
-                AND da.annee = $2
+                SUM(fp.nb_produits_vendus) AS product_count
+            FROM
+                default.fait_performance_employe_produits_vendus fp
+            JOIN
+                default.dimemployes dpe ON fp.employesk = dpe.employesk
+            JOIN
+                default.dimproduit dp ON fp.produitsk = dp.produitsk
+            JOIN
+                default.dimdate dd ON fp.datesk = dd.datesk
+            WHERE
+                dpe.codeemploye = {codeEmploye:String}
+                AND dd.annee = {year:UInt32}
         `;
-        const queryParams = [codeEmploye, year];
-        let paramIndex = 3; // Initialize the parameter index for additional parameters
+        const queryParams = { codeEmploye, year };
         if (month) {
-            query += ` AND da.mois = $${paramIndex}`;
-            queryParams.push(month);
-            paramIndex++; // Increment the parameter index
+            query += ` AND dd.mois = {month:UInt32}`;
+            queryParams.month = month;
         }
         if (quarter) {
-            query += ` AND da.trimestre = $${paramIndex}`;
-            queryParams.push(quarter);
+            query += ` AND dd.trimestre = {quarter:UInt32}`;
+            queryParams.quarter = quarter;
         }
         query += `
-                AND LEFT(dp.codeproduit, 2) IN ('BA', 'BN', 'CR', 'PA')
-                GROUP BY 
-                    LEFT(dp.codeproduit, 2);
+            GROUP BY
+                LEFT(dp.codeproduit, 2)
+            ORDER BY
+                LEFT(dp.codeproduit, 2);
         `;
-        // Execute the query with named parameters
-        const { rows: data } = await client.query(query, queryParams);
-        // Additional query for counting distinct accounts
-        let accountsQuery = `
-            SELECT
-                COUNT(distinct fpe.comptesk) AS Accounts_Count
-            FROM 
-                fait_performance_employe fpe 
-            LEFT JOIN 
-                dimemployes de ON de.employesk = fpe.employesk
-            LEFT JOIN 
-                dimdate da ON da.datesk = fpe.date_creation_sk 
-            WHERE 
-                de.codeemploye = $1
-                AND da.annee = $2
-        `;
-        const accountsQueryParams = [codeEmploye, year];
-        if (month) {
-            accountsQuery += ` AND da.mois = $3`;
-            accountsQueryParams.push(month);
-            if (quarter) {
-                accountsQuery += ` AND da.trimestre = $4`;
-                accountsQueryParams.push(quarter);
-            }
-        }
-        if (quarter) {
-            accountsQuery += ` AND da.trimestre = $3`;
-            accountsQueryParams.push(quarter);
-            if (month) {
-                accountsQuery += ` AND da.mois = $4`;
-                accountsQueryParams.push(month);
-            }
-        }
-        // Execute the accounts query
-        const { rows: accountsData } = await client.query(accountsQuery, accountsQueryParams);
-        client.release();
-        // Initialize an object to store the response
-        const response = {
-            BancassuranceVendus: 0,
-            BNQDigiVendus: 0,
-            CartesVendus: 0,
-            PacksVendus: 0,
-            ComptesOuverts: 0
-        };
-        // Iterate over the fetched data to update the response object
-        data.forEach(row => {
-            if (row.product_group === 'BA') {
-                response.BancassuranceVendus = row.product_count;
-            } else if (row.product_group === 'BN') {
-                response.BNQDigiVendus = row.product_count;
-            } else if (row.product_group === 'CR') {
-                response.CartesVendus = row.product_count;
-            } else if (row.product_group === 'PA') {
-                response.PacksVendus = row.product_count;
-            }
-        });
-        // Extract accounts_opened from the first row if data is available
-        if (accountsData.length > 0) {
-            response.ComptesOuverts = accountsData[0].accounts_count;
-        }
-        res.status(200).json(response);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
 
-router.get('/produitStats', async (req, res) => {
-    try {
-        const { codeEmploye, relation, year, quarter, month, codeProduit} = req.query;
-        // Check if codeEmploye or year parameters are missing
-        if (!codeEmploye || !year || !relation) {
-            return res.status(400).json({ message: 'codeEmploye, year and relation parameters are required' });
-        }
-        const client = await dw.connect();
-        // Define your SQL query with named parameters
-        let query = `
-                select 
-                    dc.segment,
-                    COUNT(distinct fpe.produitsk)
-                from
-                    fait_performance_employe fpe 
-                left join 
-                    dimproduit d on d.produitsk = fpe.produitsk 
-                left join 
-                    dimdate da on da.datesk = fpe.date_activation_sk 
-                left join 
-                    dimemployes de on de.employesk = fpe.employesk
-                left join 
-                    fait_vente_produits fvp on fvp.produitsk = fpe.produitsk
-                left join
-                dimclient dc on dc.clientsk = fvp.clientsk 
-                where 
-                    de.codeemploye = $1
-                    and dc.typerelation = $2
-                    and da.annee = $3
-        `;
-        const queryParams = [codeEmploye, relation, year];
-        let paramIndex = 4; // Initialize the parameter index for additional parameters
-        if (month) {
-            query += ` AND da.mois = $${paramIndex}`;
-            queryParams.push(month);
-            paramIndex++; // Increment the parameter index
-        }
-        if (quarter) {
-            query += ` AND da.trimestre = $${paramIndex}`;
-            queryParams.push(quarter);
-        }
-        if (codeProduit){
-            query += ` and LEFT(d.codeproduit, 2) = $${paramIndex}`;
-            queryParams.push(codeProduit);
-        }
-        query += `
-                group by 
-                    dc.segment;
-        `;
-        // Execute the query with named parameters
-        const {rows} = await client.query(query, queryParams);
-        // Additional query for counting distinct accounts
-        client.release();
-        const result = rows.map(row => {
-            return {
-                segment: row.segment,
-                [year]: parseInt(row.count)
-            };
-        });
-        res.json(result);
+        clickhouse.query(query, { params: queryParams }).toPromise()
+            .then((rows) => {
+                const response = {
+                    BancassuranceVendus: 0,
+                    BNQDigiVendus: 0,
+                    CartesVendus: 0,
+                    PacksVendus: 0,
+                    ComptesOuverts: 0
+                };
+                // Iterate over the fetched data to update the response object
+                rows.forEach(row => {
+                    if (row.Product_Group === 'BA') {
+                        response.BancassuranceVendus = row.product_count;
+                    } else if (row.Product_Group === 'BN') {
+                        response.BNQDigiVendus = row.product_count;
+                    } else if (row.Product_Group === 'CR') {
+                        response.CartesVendus = row.product_count;
+                    } else if (row.Product_Group === 'PA') {
+                        response.PacksVendus = row.product_count;
+                    }
+                });
+                res.status(200).json(response);
+            })
+            .catch((err) => {
+                console.error('Error:', err); // Handle any errors
+            });
+        // Initialize an object to store the response
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
